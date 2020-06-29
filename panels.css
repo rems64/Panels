@@ -1,0 +1,210 @@
+body
+{
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+#panelsMainContainer
+{
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+.pnls-panelGroup
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+.pnls-borders
+{
+    border: solid black 0px;
+}
+
+.panel
+{
+    position: absolute;
+    background-color: red;
+    height: 100px;
+    width: 100px;
+    overflow: hidden;
+    
+    color: white;
+}
+
+.first
+{
+    background-color: hsl(0, 0%, 15%);;
+}
+
+.second
+{
+    background-color: hsl(0, 0%, 15%);;
+}
+
+.pnls-separator-container
+{
+    position: absolute;
+    background-color: black;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.pnls-floatingWindow
+{
+    position: absolute;
+    background-color: hsl(0, 0%, 30%);
+    border: solid black 1px;
+}
+
+.pnls-floatingWindowDragArea
+{
+    position: relative;
+    background-color: hsl(0, 0%, 10%);
+}
+
+.pnls-floatingWindowBtnsArea
+{
+    position: relative;
+    margin-left: auto;
+    display: flex;
+    justify-content: end;
+    width: fit-content;
+    height: 100%;
+}
+
+.pnls-floatingWindowBtnsClose
+{
+    align-self: flex-end;
+    width: 20px;
+    height: 100%;
+    transition: background-color 0.2s;
+    text-align: center;
+
+    cursor: pointer;
+}
+
+.pnls-floatingWindowBtnsClose:hover
+{
+    background-color: red;
+}
+
+.pnls-floatingWindowBtnsClose::before, .pnls-floatingWindowBtnsClose::after
+{
+    content: "";
+    display: inline-block;
+    height: 100%;
+    width: 2px;
+    background-color: white;
+    transform-origin: center;
+    border-radius: 1.5px;
+}
+.pnls-floatingWindowBtnsClose::before
+{
+    transform: translate(50%, -0%) rotate(45deg);
+}
+
+
+.pnls-floatingWindowBtnsClose::after
+{
+    transform: translate(-50%, -0%) rotate(-45deg);
+}
+
+
+
+
+.pnls-floatingWindowBtnsMaximize
+{
+    text-align: center;
+    cursor: pointer;
+}
+
+.pnls-floatingWindowBtnsMaximize::before
+{
+    border: solid white 2px;
+    content: "";
+    display: inline-block;
+    height: 60%;
+    margin-top: 7.5%;
+    width: 60%;
+    transform-origin: center;
+}
+
+
+
+
+
+
+.pnls-floatingWindowBtnsMinimize
+{
+    text-align: center;
+    cursor: pointer;
+}
+
+.pnls-floatingWindowBtnsMinimize::before
+{
+    content: "";
+    display: inline-block;
+    margin-top: 10%;
+    height: 80%;
+    width: 2px;
+    background-color: white;
+    transform-origin: center;
+    transform: translate(0%, 0%) rotate(90deg);
+}
+
+
+
+
+
+.contextMenuContainer
+{
+    background-color: hsl(0, 0%, 40%);
+    padding: 1px;
+    position: absolute;
+    display: inline-block;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+.contextMenuElement
+{
+    background-color: hsl(0, 0%, 40%);
+    padding: 5px;
+    -webkit-user-select: none;
+    user-select: none;
+    color: white;
+
+    font-size: 16px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.contextMenuElement:hover
+{
+    background-color: hsl(0, 0%, 35%);
+}
+
+.contextMenuElement:active
+{
+    background-color: hsl(0, 0%, 30%);
+}
+
+.contextMenuElementRed
+{
+    background-color: hsl(0, 80%, 40%);
+}
+
+.contextMenuElementRed:hover
+{
+    background-color: hsl(0, 80%, 35%);
+}
+
+.contextMenuElementRed:active
+{
+    background-color: hsl(0, 80%, 30%);
+}
