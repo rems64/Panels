@@ -274,7 +274,7 @@ class PanelGroup extends Panel
 
         //this.m_width = $(document).width();
         this.m_width = this.m_parent.getWidth();
-        this.m_height = $(document).height();
+        this.m_height = this.m_parent.getHeight();
 
         this.m_location = {x:0, y:0}; // Window location <{x:Integer, y:Integer}>
 
@@ -311,89 +311,114 @@ class PanelGroup extends Panel
         //console.log(this.getDOM());
         //console.log(this.m_parent.getDOM());
         //console.log(this.m_width);
-        for(var i in this.m_panels)
+        if(this.m_panels.length>1)
         {
-            if(this.m_orientation==="HORIZONTAL")
+            for(var i in this.m_panels)
             {
-                maxThickness+=this.m_panels[i].getIncompressability().width;
-                if(!this.m_useAbsoluteThickness)
-                    var desiredWidth = this.m_panels[i].getTargetWidth() * this.m_width;
-                else
-                    var desiredWidth = this.m_panels[i].getWidth();
-                var obtainedWidth = 0;
-                if(this.m_fill && i == this.m_panels.length-1)
+                if(this.m_orientation==="HORIZONTAL")
                 {
-                    obtainedWidth = maxThickness - cumulatedThickness;
-                }
-                else
-                {
-                    if(cumulatedThickness+desiredWidth<=maxThickness)
-                    {
-                        if(desiredWidth > this.m_panels[i].getIncompressability().width)
-                        {
-                            obtainedWidth = desiredWidth;
-                        }
-                        else
-                        {
-                            obtainedWidth = this.m_panels[i].getIncompressability().width;
-                            //obtainedWidth = 100;
-                        }
-                    }
+                    maxThickness+=this.m_panels[i].getIncompressability().width;
+                    if(!this.m_useAbsoluteThickness)
+                        var desiredWidth = this.m_panels[i].getTargetWidth() * this.m_width;
                     else
+                        var desiredWidth = this.m_panels[i].getWidth();
+                    var obtainedWidth = 0;
+                    if(this.m_fill && i == this.m_panels.length-1)
                     {
                         obtainedWidth = maxThickness - cumulatedThickness;
                     }
-                }
-                this.m_panels[i].m_location = {x:cumulatedThickness, y:0};
-                this.m_panels[i].m_width = obtainedWidth;
-                $(this.m_panels[i].getDOM()).css("top", this.m_panels[i].m_location.y);
-                $(this.m_panels[i].getDOM()).css("left", cumulatedThickness);
-                $(this.m_panels[i].getDOM()).css("width", obtainedWidth);
-                $(this.m_panels[i].getDOM()).css("height", this.m_height);
-                cumulatedThickness+=obtainedWidth;
-            }
-            else if(this.m_orientation==="VERTICAL")
-            {
-                maxThickness+=this.m_panels[i].getIncompressability().height;
-                if(!this.m_useAbsoluteThickness)
-                {
-                    var desiredHeight = this.m_panels[i].getTargetHeight() * this.m_height;
-                }
-                else
-                    var desiredHeight = this.m_panels[i].getHeight();
-                var obtainedHeight = 0;
-                if(this.m_fill && i == this.m_panels.length-1)
-                {
-                    obtainedHeight = maxThickness - cumulatedThickness;
-                }
-                else
-                {
-                    if(cumulatedThickness+desiredHeight<maxThickness)
+                    else
                     {
-                        if(desiredHeight > this.m_panels[i].getIncompressability().height)
+                        if(cumulatedThickness+desiredWidth<=maxThickness)
                         {
-                            obtainedHeight = desiredHeight;
+                            if(desiredWidth > this.m_panels[i].getIncompressability().width)
+                            {
+                                obtainedWidth = desiredWidth;
+                            }
+                            else
+                            {
+                                obtainedWidth = this.m_panels[i].getIncompressability().width;
+                                //obtainedWidth = 100;
+                            }
                         }
                         else
                         {
-                            obtainedHeight = this.m_panels[i].getIncompressability().height;
-                            //obtainedHeight = 100;
+                            obtainedWidth = maxThickness - cumulatedThickness;
                         }
                     }
+                    this.m_panels[i].m_location = {x:cumulatedThickness, y:0};
+                    this.m_panels[i].m_width = obtainedWidth;
+                    this.m_panels[i].m_height = this.m_height;
+                    $(this.m_panels[i].getDOM()).css("top", this.m_panels[i].m_location.y);
+                    $(this.m_panels[i].getDOM()).css("left", cumulatedThickness);
+                    $(this.m_panels[i].getDOM()).css("width", obtainedWidth);
+                    $(this.m_panels[i].getDOM()).css("height", this.m_height);
+                    cumulatedThickness+=obtainedWidth;
+                }
+                else if(this.m_orientation==="VERTICAL")
+                {
+                    maxThickness+=this.m_panels[i].getIncompressability().height;
+                    if(!this.m_useAbsoluteThickness)
+                        var desiredHeight = this.m_panels[i].getTargetHeight() * this.m_height;
                     else
+                        var desiredHeight = this.m_panels[i].getHeight();
+                    var obtainedHeight = 0;
+                    if(this.m_fill && i == this.m_panels.length-1)
                     {
                         obtainedHeight = maxThickness - cumulatedThickness;
                     }
+                    else
+                    {
+                        if(cumulatedThickness+desiredHeight<=maxThickness)
+                        {
+                            if(desiredHeight > this.m_panels[i].getIncompressability().height)
+                            {
+                                obtainedHeight = desiredHeight;
+                            }
+                            else
+                            {
+                                obtainedHeight = this.m_panels[i].getIncompressability().height;
+                                //obtainedWidth = 100;
+                            }
+                        }
+                        else
+                        {
+                            obtainedHeight = maxThickness - cumulatedThickness;
+                        }
+                    }
+                    this.m_panels[i].m_location = {x:0, y:cumulatedThickness};
+                    this.m_panels[i].m_height = obtainedHeight;
+                    this.m_panels[i].m_width = this.m_width;
+                    $(this.m_panels[i].getDOM()).css("top", cumulatedThickness);
+                    $(this.m_panels[i].getDOM()).css("left", this.m_panels[i].m_location.x);
+                    $(this.m_panels[i].getDOM()).css("width", this.m_width);
+                    $(this.m_panels[i].getDOM()).css("height", obtainedHeight);
+                    cumulatedThickness+=obtainedHeight;
                 }
-                this.m_panels[i].m_location = {x:0, y:cumulatedThickness};
-                this.m_panels[i].m_height = obtainedHeight;
-                $(this.m_panels[i].getDOM()).css("left", this.m_panels[i].m_location.x);
-                $(this.m_panels[i].getDOM()).css("top", cumulatedThickness);
-                $(this.m_panels[i].getDOM()).css("width", this.m_width);
-                $(this.m_panels[i].getDOM()).css("height", obtainedHeight);
-                cumulatedThickness+=obtainedHeight;
+                this.m_panels[i].update();
             }
-            this.m_panels[i].update();
+        }
+        else
+        {
+            if(this.m_orientation==="HORIZONTAL")
+            {
+                this.m_panels[0].m_location = {x:0, y:0};
+                this.m_panels[0].m_width = this.m_width;
+                $(this.m_panels[0].getDOM()).css("top", this.m_panels[0].m_location.y);
+                $(this.m_panels[0].getDOM()).css("left", this.m_panels[0].m_location.x);
+                $(this.m_panels[0].getDOM()).css("width", this.m_panels[0].m_width);
+                $(this.m_panels[0].getDOM()).css("height", this.m_panels[0].m_height);
+            }
+            else
+            {
+                this.m_panels[0].m_location = {x:0, y:0};
+                this.m_panels[0].m_height = this.m_height;
+                $(this.m_panels[0].getDOM()).css("top", this.m_panels[0].m_location.y);
+                $(this.m_panels[0].getDOM()).css("left", this.m_panels[0].m_location.x);
+                $(this.m_panels[0].getDOM()).css("width", this.m_panels[0].m_width);
+                $(this.m_panels[0].getDOM()).css("height", this.m_panels[0].m_height);
+            }
+            this.m_panels[0].update()
         }
         for(var i in this.m_separators)
         {
@@ -459,8 +484,9 @@ class DocksManager
         this.m_container = this.addPanelGroup("main", "HORIZONTAL", []);
         window.addEventListener('resize', function(event){
             self.update();
-            self.m_container.m_width = self.getWidth();
-            self.update()
+            //self.m_container.m_width = self.getWidth();
+
+            //self.update()
         })
     }
     addPanel(name, additionnalClasses, inHtml)
@@ -500,19 +526,27 @@ class DocksManager
     }
     update()
     {
+        this.m_container.m_width = this.getWidth();
+        this.m_container.m_height = this.getHeight();
         this.m_container.css("width", this.m_container.getWidth());
         this.m_container.css("height", this.m_container.getHeight());
         this.m_container.update();
+    /*
     for(var i in this.m_panels)
         {
             this.m_panels[i].css("width", this.m_panels[i].getWidth());
             this.m_panels[i].css("height", this.m_panels[i].getHeight());
             this.m_panels[i].update();
         }
+    */
     }
     getWidth()
     {
         return this.m_DOMParent[0].clientWidth;
+    }
+    getHeight()
+    {
+        return this.m_DOMParent[0].clientHeight;
     }
 }
 
