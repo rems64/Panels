@@ -18,8 +18,8 @@ var timeline = secondBar.addPanel("Timeline", ["first"], "Timeline, là où on a
 manager.update();
 
 
-/*
-var win1 = new FloatingWindow(
+
+win1 = new FloatingWindow(
     $("body"),
     {
         x: 100,
@@ -31,4 +31,3 @@ var win1 = new FloatingWindow(
     }
 );
 win1.update();
-*/

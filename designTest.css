@@ -1,0 +1,25 @@
+body, html
+{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.background
+{
+    height: 100%;
+    width: 100%;
+    background-color: hsl(100, 0%, 10%);
+}
+
+.pnls-barGroup
+{
+    backdrop-filter: blur(4px);
+}
+
+.pnls-icon
+{
+    color: white;
+    border-radius: 10px;
+}

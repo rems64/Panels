@@ -221,39 +221,51 @@ class PanelSeparator
     }
     unSplit(toLeft)
     {
-        if(!toLeft)
-        {
-            this.m_parent.m_panels.splice(this.m_target2.m_parent.m_panels.indexOf(this.m_target2), 1);
-            this.m_parent.m_separators.splice(this.m_target2.m_parent.m_separators.indexOf(this), 1);
-            $(this.m_container).remove();
-            $(this.m_target2.getDOM()).remove();
-            this.m_target1.m_parent.update();
-        }
-        else
+        if(toLeft)
         {
             $(this.m_target1.getDOM()).remove(); // Remove the overriden pannel from DOM
+            var stored = {
+                width: this.m_target1.getWidth(),
+                tWidth: this.m_target1.getTargetWidth(),
+                height: this.m_target1.getHeight(),
+                tHeight: this.m_target1.getTargetHeight()
+            }
 
             var nSep = 0;
+            var nSepIndex = 0;
             for(var i in this.m_parent.m_separators) // Find the new m_target1
             {
                 if(this.m_parent.m_separators[i].m_target2 == this.m_target1)
                 {
                     nSep = this.m_parent.m_separators[i];
+                    nSepIndex = i;
                     break
                 }
             }
             this.m_target1 = nSep.m_target1;
             //this.m_target1 = this.m_parent.m_panels[this.m_parent.m_panels.indexOf(this.m_target1)-1];
 
-            $(this.m_parent.m_separators[this.m_target1.m_parent.m_separators.indexOf(nSep)].m_container).remove(); // Remove old separator
+            //$(this.m_parent.m_separators[this.m_target1.m_parent.m_separators.indexOf(nSep)].m_container).remove(); // Remove old separator
+            $(nSep.m_container).remove()
+            this.m_parent.m_separators.splice(nSepIndex, 1);
 
-            this.m_parent.m_panels.splice(this.m_target1.m_parent.m_panels.indexOf(this.m_target1), 1);
-            this.m_parent.m_separators.splice(this.m_target1.m_parent.m_separators.indexOf(this)-1, 1);
-            if(this.m_orientation==="HORIZNOTAL")
+            //this.m_parent.m_panels.splice(this.m_target1.m_parent.m_panels.indexOf(this.m_target1), 1);
+            //this.m_parent.m_separators.splice(this.m_target1.m_parent.m_separators.indexOf(this)-1, 1);
+
+            if(this.m_parent.m_orientation==="HORIZONTAL")
             {
-                //this.m_target1.m_width
+                this.m_target1.m_width+=stored.width;
+                this.m_target1.m_targetWidth+=stored.tWidth;
             }
             this.m_parent.update();
+        }
+        else
+        {
+            this.m_parent.m_panels.splice(this.m_target2.m_parent.m_panels.indexOf(this.m_target2), 1);
+            this.m_parent.m_separators.splice(this.m_target2.m_parent.m_separators.indexOf(this), 1);
+            $(this.m_container).remove();
+            $(this.m_target2.getDOM()).remove();
+            this.m_target1.m_parent.update();
         }
     }
 }
@@ -404,6 +416,7 @@ class PanelGroup extends Panel
             {
                 this.m_panels[0].m_location = {x:0, y:0};
                 this.m_panels[0].m_width = this.m_width;
+                this.m_panels[0].m_height = this.m_height;
                 $(this.m_panels[0].getDOM()).css("top", this.m_panels[0].m_location.y);
                 $(this.m_panels[0].getDOM()).css("left", this.m_panels[0].m_location.x);
                 $(this.m_panels[0].getDOM()).css("width", this.m_panels[0].m_width);
@@ -412,6 +425,7 @@ class PanelGroup extends Panel
             else
             {
                 this.m_panels[0].m_location = {x:0, y:0};
+                this.m_panels[0].m_width = this.m_width;
                 this.m_panels[0].m_height = this.m_height;
                 $(this.m_panels[0].getDOM()).css("top", this.m_panels[0].m_location.y);
                 $(this.m_panels[0].getDOM()).css("left", this.m_panels[0].m_location.x);
@@ -571,38 +585,48 @@ class FloatingWindow
 {
     constructor(parent, location, size) {
         var self = this;
+        this.m_parent = parent;
         this.m_location = {x:location.x, y:location.y};
         this.m_targetSize = {width: size.width, height: size.height};
         this.m_container = document.createElement("div");
         this.m_container.classList.add("pnls-floatingWindow");
         parent[0].appendChild(this.m_container);
-
+        
         this.m_dragArea = document.createElement("div");
         this.m_dragArea.classList.add("pnls-floatingWindowDragArea");
         this.m_container.appendChild(this.m_dragArea);
-
+        
         this.m_buttonsArea = document.createElement("div");
         this.m_buttonsArea.classList.add("pnls-floatingWindowBtnsArea");
         this.m_dragArea.appendChild(this.m_buttonsArea);
-
+        
         this.m_minimizeBtn = document.createElement("div");
         this.m_minimizeBtn.classList.add("pnls-floatingWindowBtnsMinimize");
         this.m_buttonsArea.appendChild(this.m_minimizeBtn);
-
+        
         this.m_maximizeBtn = document.createElement("div");
         this.m_maximizeBtn.classList.add("pnls-floatingWindowBtnsMaximize");
         this.m_buttonsArea.appendChild(this.m_maximizeBtn);
-
+        
         this.m_closeBtn = document.createElement("div");
         this.m_closeBtn.classList.add("pnls-floatingWindowBtnsClose");
         this.m_buttonsArea.appendChild(this.m_closeBtn);
-
-
+        
+        
         this.m_isBeingDragged = false;
         this.m_dragOffset = {x: 0, y: 0};
-
+        
         this.m_keepFullyInside = true;
+        
+        this.m_borderThickness = 10;
+        this.m_hoveredBorder = "none";
+        this.m_isBorderBeingDragged = false;
 
+        this.m_isMaximized = false;
+        this.m_preMaximizedInfos = {x:0, y:0, width:0, height:0};
+
+        this.m_incompressability = {width: 10, height: 50};
+        console.log(this.m_buttonsArea.offsetWidth);
         $(this.m_dragArea).on("mousedown", function(event) {
             self.m_dragOffset = {
                 x: event.clientX - self.m_location.x,
@@ -610,11 +634,34 @@ class FloatingWindow
             }
             self.m_isBeingDragged = true;
         });
+        $(this.m_dragArea).on("dblclick", function(event) {
+            self.maximize();
+        });
+
+        $(document).on("mousedown", function(event) {
+            if(self.m_hoveredBorder!="none")
+            {
+                if(self.m_incompressability.width < self.m_buttonsArea.offsetWidth)
+                    self.m_incompressability.width = self.m_buttonsArea.offsetWidth;
+                self.m_isBorderBeingDragged = true;
+                self.m_dragOffset = {
+                    x: event.clientX,
+                    y: event.clientY,
+                    width: self.m_targetSize.width,
+                    height: self.m_targetSize.height
+                }
+            }
+            else
+            {
+                self.m_isBorderBeingDragged = false;
+            }
+        })
         $(document).on("mouseup", function() {
             $(document.body).css("user-select", "auto");
             self.m_isBeingDragged = false;
+            self.m_isBorderBeingDragged = false;
         })
-        $(document).on("mousemove", function() {
+        $(document).on("mousemove", function(event) {
             if(self.m_isBeingDragged)
             {
                 $(document.body).css("user-select", "none");
@@ -661,6 +708,173 @@ class FloatingWindow
                 }
                 self.update()
             }
+            else if(self.m_isBorderBeingDragged)
+            {
+                $(document.body).css("user-select", "none");
+                if(self.m_hoveredBorder=="bottom")
+                {
+                    if(event.clientY - self.m_location.y>self.m_incompressability.height)
+                    {
+                        self.m_targetSize.height = event.clientY - self.m_location.y;
+                        self.update();
+                    }
+                    else
+                    {
+                        self.m_targetSize.height = self.m_incompressability.height;
+                        self.update();
+                    }
+                }
+                else if(self.m_hoveredBorder=="right")
+                {
+                    if(event.clientX - self.m_location.x > self.m_incompressability.width)
+                    {
+                        self.m_targetSize.width = event.clientX - self.m_location.x;
+                        self.update();
+                    }
+                    else
+                    {
+                        self.m_targetSize.width = self.m_incompressability.width;
+                        self.update();
+                    }
+                }
+                else if(self.m_hoveredBorder=="left")
+                {
+                    if((self.m_dragOffset.width + (self.m_dragOffset.x - event.clientX)) > self.m_incompressability.width)
+                    {
+                        self.m_location.x = event.clientX;
+                        self.m_targetSize.width = self.m_dragOffset.width + (self.m_dragOffset.x - event.clientX);
+                        self.update();
+                    }
+                    else
+                    {
+                        self.m_targetSize.width = self.m_incompressability.width;
+                        self.m_location.x = self.m_dragOffset.x + (self.m_dragOffset.width - self.m_incompressability.width);
+                        self.update();
+                    }
+                }
+                else if(self.m_hoveredBorder=="bottomright")
+                {
+                    if(event.clientY - self.m_location.y>self.m_incompressability.height)
+                    {
+                        self.m_targetSize.height = event.clientY - self.m_location.y;
+                        self.update();
+                    }
+                    else
+                    {
+                        self.m_targetSize.height = self.m_incompressability.height;
+                        self.update();
+                    }
+                    if(event.clientX - self.m_location.x > self.m_incompressability.width)
+                    {
+                        self.m_targetSize.width = event.clientX - self.m_location.x;
+                        self.update();
+                    }
+                    else
+                    {
+                        self.m_targetSize.width = self.m_incompressability.width;
+                        self.update();
+                    }
+                }
+                else if(self.m_hoveredBorder=="bottomleft")
+                {
+                    if(event.clientY - self.m_location.y>self.m_incompressability.height)
+                    {
+                        self.m_targetSize.height = event.clientY - self.m_location.y;
+                        self.update();
+                    }
+                    else
+                    {
+                        self.m_targetSize.height = self.m_incompressability.height;
+                        self.update();
+                    }
+                    if((self.m_dragOffset.width + (self.m_dragOffset.x - event.clientX)) > self.m_incompressability.width)
+                    {
+                        self.m_location.x = event.clientX;
+                        self.m_targetSize.width = self.m_dragOffset.width + (self.m_dragOffset.x - event.clientX);
+                        self.update();
+                    }
+                    else
+                    {
+                        self.m_targetSize.width = self.m_incompressability.width;
+                        self.m_location.x = self.m_dragOffset.x + (self.m_dragOffset.width - self.m_incompressability.width);
+                        self.update();
+                    }
+                }
+            }
+            else
+            {
+                if(event.clientX > self.m_location.x & event.clientX < (self.m_location.x + self.m_targetSize.width))
+                {
+                    if(event.clientY > (self.m_location.y+self.m_targetSize.height-self.m_borderThickness/2) && event.clientY < (self.m_location.y+self.m_targetSize.height+self.m_borderThickness/2))
+                    {
+                        if(event.clientX > (self.m_location.x-self.m_borderThickness/2) & event.clientX < (self.m_location.x+self.m_borderThickness/2))
+                        {
+                            document.body.style.cursor = 'ne-resize';
+                            self.m_hoveredBorder = "bottomleft";
+                        }
+                        else if(event.clientX > (self.m_location.x+self.m_targetSize.width-self.m_borderThickness/2) & event.clientX < (self.m_location.x+self.m_targetSize.width+self.m_borderThickness/2))
+                        {
+                            document.body.style.cursor = 'se-resize';
+                            self.m_hoveredBorder = "bottomright";
+                            
+                        }
+                        else
+                        {
+                            document.body.style.cursor = 'n-resize';
+                            self.m_hoveredBorder = "bottom";
+                        }
+                    }
+                    else
+                    {
+                        document.body.style.cursor = 'default';
+                        self.m_hoveredBorder = "none";
+                    }
+                }
+                else if(event.clientY > self.m_location.y & event.clientY < (self.m_location.y + self.m_targetSize.height))
+                {
+                    if(event.clientX > (self.m_location.x-self.m_borderThickness/2) & event.clientX < (self.m_location.x+self.m_borderThickness/2))
+                    {
+                        //console.log("left")
+                        document.body.style.cursor = 'e-resize';
+                        self.m_hoveredBorder = "left";
+                    }
+                    else if(event.clientX > (self.m_location.x+self.m_targetSize.width-self.m_borderThickness/2) & event.clientX < (self.m_location.x+self.m_targetSize.width+self.m_borderThickness/2))
+                    {
+                        //console.log("right")
+                        document.body.style.cursor = 'e-resize';
+                        self.m_hoveredBorder = "right";
+                    }
+                    else
+                    {
+                        document.body.style.cursor = 'default';
+                        self.m_hoveredBorder = "none";
+                    }
+                }
+                else
+                {
+                    document.body.style.cursor = 'default';
+                    self.m_hoveredBorder = "none";
+                }
+            }
+        })
+        $(this.m_closeBtn).on("click", function() {
+            self.close();
+        });
+        $(this.m_maximizeBtn).on("click", function() {
+            self.maximize();
+        });
+        $(this.m_minimizeBtn).on("click", function() {
+            self.minimize();
+        });
+        window.addEventListener('resize', function(event){
+            if(self.m_isMaximized)
+            {
+                self.m_location.x = 0;
+                self.m_location.y = 0;
+                self.m_targetSize.width = self.m_parent[0].offsetWidth;
+                self.m_targetSize.height = self.m_parent[0].offsetHeight;    
+                self.update();
+            }
         })
     }
     update()
@@ -680,6 +894,35 @@ class FloatingWindow
         $(this.m_maximizeBtn).css("width", 25);
 
         $(this.m_minimizeBtn).css("width", 30);
+    }
+    close()
+    {
+        $(this.m_container).remove();
+    }
+    maximize()
+    {
+        if(!this.m_isMaximized)
+        {
+            this.m_isMaximized = true;
+            this.m_preMaximizedInfos.x = this.m_location.x;
+            this.m_preMaximizedInfos.y = this.m_location.y;
+            this.m_preMaximizedInfos.width = this.m_targetSize.width;
+            this.m_preMaximizedInfos.height = this.m_targetSize.height;
+            this.m_location.x = 0;
+            this.m_location.y = 0;
+            this.m_targetSize.width = this.m_parent[0].offsetWidth;
+            this.m_targetSize.height = this.m_parent[0].offsetHeight;
+            this.update();
+        }
+        else
+        {
+            this.m_isMaximized = false;
+            this.m_location.x = this.m_preMaximizedInfos.x;
+            this.m_location.y = this.m_preMaximizedInfos.y;
+            this.m_targetSize.width = this.m_preMaximizedInfos.width;
+            this.m_targetSize.height = this.m_preMaximizedInfos.height;
+            this.update()
+        }
     }
 }
 
