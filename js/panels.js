@@ -4,8 +4,9 @@
 
 class Panel
 {
-    constructor(parent) {
+    constructor(manager, parent) {
         this.m_parent = parent; // Parent object (common to PanelGroup) <Object>
+        this.m_manager = manager;
         this.m_docked = true; // Window state (docked or not) <Boolean>
         this.m_height = 100; // Panel / Window height <Integer>
         this.m_width = 100; // Panel / Window width <Integer>
@@ -38,25 +39,111 @@ class DockablePanel extends Panel // Base panel class
     DockablePanel is the key class
     It holds both Panel et Window features
     */
-   constructor(parent, name, additionnalClasses) { // Constructor called during initialisation
+   constructor(manager, parent, name, additionnalClasses) { // Constructor called during initialisation
     super()
+    var self = this;
     this.m_parent = parent;
+    this.m_manager = manager;
     this.m_name = name; // Window name (used when window is undocked) <String>
     this.m_location = {x:0, y:0}; // Window location <{x:Integer, y:Integer}>
     this.m_classes = additionnalClasses; // Additionnal css classes <[String]>
     this.m_container = document.createElement("div"); // Panel DOM element <"object">
-    this.m_container.classList.add("panel");                    // Add all the additionnal css classes to the panel DOM element
+    this.m_container.classList.add("pnls-panel");                    // Add all the additionnal css classes to the panel DOM element
+    
+    this.m_topBar = document.createElement("div");
+    this.m_topBar.classList.add("pnls-panelTopBar");
+    this.m_container.appendChild(this.m_topBar);
+
+    this.m_undockBtn = document.createElement("div");
+    this.m_undockBtn.classList.add("pnls-panelUndockBtn");
+    this.m_topBar.appendChild(this.m_undockBtn);
+
+    $(this.m_undockBtn).click(() => {
+        self.undock();
+    })
     for(var i in additionnalClasses)                            // ---
-    {                                                           // ---
-        this.m_container.classList.add(additionnalClasses[i]);  // ---
-    }                                                           // ---
+        {                                                           // ---
+            this.m_container.classList.add(additionnalClasses[i]);  // ---
+        }                                                           // ---
     }
     getIncompressability() // Getter for m_incompressability
     {
         return this.m_incompressability;
     }
+    getLocation()
+    {
+        return {
+            x: $(this.m_container).offset().left,
+            y: $(this.m_container).offset().top
+        }
+    }
+    undock()
+    {
+        var nWin = this.m_manager.addWindow(
+            $(manager.getDOM()),
+            {
+                x: this.getLocation().x,
+                y: this.getLocation().y
+            },
+            {
+                width: this.m_width,
+                height: this.m_height
+            });
+        
+        var concernedIndex = 0;
+        for(var i in this.m_parent.m_panels)
+        {
+            //console.log(this.m_parent.m_panels[i]);
+            if(this.m_parent.m_panels[i] == this)
+            {
+                concernedIndex = i;
+                break
+            }
+        }
+        if(concernedIndex+1!=this.m_parent.m_panels.length)
+        {
+            console.log("here we go")
+            var concernedIndex2 = 0;
+            for(var i in this.m_parent.m_separators)
+            {
+                //console.log(this.m_parent.m_panels[i]);
+                if(this.m_parent.m_separators[i].m_target2 == this)
+                {
+                    console.log(this.m_parent.m_separators[i])
+                    //console.log(concernedIndex+1)
+                    console.log(this.m_parent.m_panels[Number(concernedIndex)+1].m_container);
+                    this.m_parent.m_separators[i].m_target2 = this.m_parent.m_panels[Number(concernedIndex)+1];
+                    $(this.m_parent.m_separators[i]).parent().prepend($(this.m_parent.m_separators[i]));
+                }
+                if(this.m_parent.m_separators[i].m_target1 == this)
+                {
+                    console.log("FOUJ")
+                    concernedIndex2 = i;
+                    $(this.m_parent.m_separators[i].m_container).remove()
+                    break
+                }
+            }
+            this.m_parent.m_separators.splice(concernedIndex2, 1);
+        }
+        else
+        {
+            $(this.m_parent.m_separators[this.m_parent.m_separators.length-1].m_container).remove()
+            this.m_parent.m_separators.splice(this.m_parent.m_separators.length-1, 1);
+        }
+        
+        console.log(this.m_parent.m_panels[concernedIndex].m_container)
+        this.m_parent.m_panels.splice(concernedIndex, 1);
+
+        console.log(this.m_container);
+        $(this.m_container).remove()
+        this.m_parent.update();
+    }
     update() // Common update function
     {
+        $(this.m_topBar).css("top", 0);
+        $(this.m_topBar).css("left", 0);
+        $(this.m_topBar).css("width", this.m_width);
+        $(this.m_topBar).css("height", 20);
     }    
     getDOM()
     {
@@ -67,9 +154,10 @@ class DockablePanel extends Panel // Base panel class
 
 class PanelSeparator
 {
-    constructor(parent, target1, target2, orientation) {
+    constructor(manager, parent, target1, target2, orientation) {
         var self = this;
         this.m_parent = parent;
+        this.m_manager = manager;
         this.m_target1 = target1;
         this.m_target2 = target2;
         this.m_orientation = orientation;
@@ -96,7 +184,7 @@ class PanelSeparator
         $(this.m_container).on("mousedown", function(event) {
             self.m_isSelected = true;
             if(self.m_orientation === "HORIZONTAL")
-                self.m_lastThickness = self.m_target1.m_width + self.m_target2.m_width;
+                self.click = self.m_target1.m_width + self.m_target2.m_width;
             else if(self.m_orientation == "VERTICAL")
                 self.m_lastThickness = self.m_target1.m_height + self.m_target2.m_height;
         });
@@ -208,7 +296,7 @@ class PanelSeparator
             {
                 if(this.m_parent.m_panels[i]==this.m_target2)
                 {
-                    this.m_location.y = this.m_parent.m_panels[i].m_location.y;
+                    this.m_location.y = this.m_parent.m_panels[i].m_location.y - this.m_thickness/2;
                     break
                 }
             }
@@ -273,10 +361,11 @@ class PanelSeparator
 
 class PanelGroup extends Panel
 {
-    constructor(parent, orientation) { // Constructor called during initialisation
+    constructor(manager, parent, orientation) { // Constructor called during initialisation
         super()
         var self = this;
         this.m_parent = parent;
+        this.m_manager = manager;
         this.m_container = document.createElement("div");
         parent.getDOM().appendChild(this.m_container);
         this.m_container.classList.add("pnls-panelGroup");
@@ -457,7 +546,7 @@ class PanelGroup extends Panel
         this.m_panels.push(newChild);
         if(this.m_panels.length>1)
         {
-            var tmpSeparator = new PanelSeparator(this, this.m_panels[this.m_panels.length-2], newChild, this.m_orientation);
+            var tmpSeparator = new PanelSeparator(this.m_manager, this, this.m_panels[this.m_panels.length-2], newChild, this.m_orientation);
             this.m_separators.push(tmpSeparator);
             tmpSeparator.update();
         }
@@ -470,24 +559,23 @@ class PanelGroup extends Panel
     {
         return this.m_container;
     }
-    addPanel(name, additionnalClasses, inHtml)
+    addPanel(name, additionnalClasses)
     {
-        var nPanel = new DockablePanel(this, name, additionnalClasses);
-        nPanel.getDOM().innerHTML = inHtml;
+        var nPanel = new DockablePanel(this.m_manager, this, name, additionnalClasses);
         this.addChild(nPanel)
         //this.update();
         return nPanel;
     }
     addPanelGroup(name, ori, additionnalClasses)
     {
-        var nGroup = new PanelGroup(this, ori);
+        var nGroup = new PanelGroup(this.m_manager, this, ori);
         this.addChild(nGroup);
         return nGroup;
     }
 }
 
 
-class DocksManager
+class PanelsManager
 {
     constructor(DOMParent) { // Constructor called during initialisation
         var self = this;
@@ -496,6 +584,7 @@ class DocksManager
         //this.m_container.m_container.classList.add("pnls-borders");
         this.m_panels = [];
         this.m_container = this.addPanelGroup("main", "HORIZONTAL", []);
+        this.m_windows = [];
         window.addEventListener('resize', function(event){
             self.update();
             //self.m_container.m_width = self.getWidth();
@@ -505,8 +594,7 @@ class DocksManager
     }
     addPanel(name, additionnalClasses, inHtml)
     {
-        var nPanel = new DockablePanel(this.m_container, name, additionnalClasses);
-        nPanel.getDOM().innerHTML = inHtml;
+        var nPanel = new DockablePanel(this, this.m_container, name, additionnalClasses);
         this.m_container.m_panels.push(nGroup);
         //this.m_panels[0].addChild(nPanel)
         return nPanel;
@@ -515,16 +603,23 @@ class DocksManager
     {
         if(this.m_container === undefined)
         {
-            var nGroup = new PanelGroup(this, ori);
+            var nGroup = new PanelGroup(this, this, ori);
             this.m_panels.push(nGroup);
         }
         else
         {
-            var nGroup = new PanelGroup(this.m_container, ori);
+            var nGroup = new PanelGroup(this, this.m_container, ori);
             this.m_container.m_panels.push(nGroup);
         }
         //this.getDOM().addChild(nGroup);
         return nGroup;
+    }
+    addWindow(parent, location, size)
+    {
+        var nWin = new FloatingWindow(this, this, location, size);
+        this.m_windows.push(nWin);
+        nWin.update()
+        return nWin;
     }
     getDOM()
     {
@@ -545,6 +640,10 @@ class DocksManager
         this.m_container.css("width", this.m_container.getWidth());
         this.m_container.css("height", this.m_container.getHeight());
         this.m_container.update();
+        for(var i in this.m_windows)
+        {
+            this.m_windows[i].update();
+        }
     /*
     for(var i in this.m_panels)
         {
@@ -565,40 +664,31 @@ class DocksManager
 }
 
 
-class PanelsManager {
-    constructor() {
-        this.m_docksManager;
-        this.m_windows = [];
-    }
-    update()
-    {
-        for(var i in this.m_windows)
-        {
-            this.m_windows[i].update();
-        }
-    }
-}
-
 
 
 class FloatingWindow
 {
-    constructor(parent, location, size) {
+    constructor(manager, parent, location, size) {
         var self = this;
         this.m_parent = parent;
+        this.m_manager = manager;
         this.m_location = {x:location.x, y:location.y};
         this.m_targetSize = {width: size.width, height: size.height};
         this.m_container = document.createElement("div");
         this.m_container.classList.add("pnls-floatingWindow");
-        parent[0].appendChild(this.m_container);
-        
+        parent.getDOM().appendChild(this.m_container);
+
+        this.m_topBar = document.createElement("div");
+        this.m_topBar.classList.add("pnls-floatingWindowTopBar");
+        this.m_container.appendChild(this.m_topBar);
+
         this.m_dragArea = document.createElement("div");
         this.m_dragArea.classList.add("pnls-floatingWindowDragArea");
-        this.m_container.appendChild(this.m_dragArea);
+        this.m_topBar.appendChild(this.m_dragArea);
         
         this.m_buttonsArea = document.createElement("div");
         this.m_buttonsArea.classList.add("pnls-floatingWindowBtnsArea");
-        this.m_dragArea.appendChild(this.m_buttonsArea);
+        this.m_topBar.appendChild(this.m_buttonsArea);
         
         this.m_minimizeBtn = document.createElement("div");
         this.m_minimizeBtn.classList.add("pnls-floatingWindowBtnsMinimize");
@@ -626,13 +716,22 @@ class FloatingWindow
         this.m_preMaximizedInfos = {x:0, y:0, width:0, height:0};
 
         this.m_incompressability = {width: 10, height: 50};
-        console.log(this.m_buttonsArea.offsetWidth);
+
+        this.m_dragAreaThickness = 28;
+        
+        $(this.m_container).on("mouseup", function(event) {
+            //self.toFront();
+        });
+        
         $(this.m_dragArea).on("mousedown", function(event) {
+            self.toFront();
             self.m_dragOffset = {
                 x: event.clientX - self.m_location.x,
                 y: event.clientY - self.m_location.y
             }
             self.m_isBeingDragged = true;
+        });
+        $(this.m_dragArea).on("click", function(event) {
         });
         $(this.m_dragArea).on("dblclick", function(event) {
             self.maximize();
@@ -661,9 +760,14 @@ class FloatingWindow
             self.m_isBeingDragged = false;
             self.m_isBorderBeingDragged = false;
         })
+        $(this.m_container).on("mouseleave", () => {
+            document.body.style.cursor = "default";
+        })
         $(document).on("mousemove", function(event) {
             if(self.m_isBeingDragged)
             {
+                if(self.m_isMaximized)
+                    self.maximize()
                 $(document.body).css("user-select", "none");
                 if(!self.m_keepFullyInside)
                 {
@@ -687,10 +791,10 @@ class FloatingWindow
                         var tmpX = event.clientX - self.m_dragOffset.x;
                     }
 
-                    if(event.clientY - self.m_dragOffset.y < 0)
+                    if(event.clientY - self.m_dragOffset.y - self.m_dragAreaThickness < 0)
                     {
                         //var tmpY = self.m_dragArea.height;
-                        var tmpY = 0;
+                        var tmpY = self.m_dragAreaThickness;
                     }
                     else if(event.clientY - self.m_dragOffset.y + self.m_targetSize.height > $(window).height())
                     {
@@ -801,11 +905,12 @@ class FloatingWindow
                     }
                 }
             }
+            /*
             else
             {
                 if(event.clientX > self.m_location.x & event.clientX < (self.m_location.x + self.m_targetSize.width))
                 {
-                    if(event.clientY > (self.m_location.y+self.m_targetSize.height-self.m_borderThickness/2) && event.clientY < (self.m_location.y+self.m_targetSize.height+self.m_borderThickness/2))
+                    if(event.clientY > (self.m_location.y+self.m_targetSize.height-self.m_borderThickness) && event.clientY < (self.m_location.y+self.m_targetSize.height))
                     {
                         if(event.clientX > (self.m_location.x-self.m_borderThickness/2) & event.clientX < (self.m_location.x+self.m_borderThickness/2))
                         {
@@ -822,23 +927,24 @@ class FloatingWindow
                         {
                             document.body.style.cursor = 'n-resize';
                             self.m_hoveredBorder = "bottom";
+                            //console.log("bottom");
                         }
                     }
                     else
                     {
-                        document.body.style.cursor = 'default';
+                        //document.body.style.cursor = 'default';
                         self.m_hoveredBorder = "none";
                     }
                 }
                 else if(event.clientY > self.m_location.y & event.clientY < (self.m_location.y + self.m_targetSize.height))
                 {
-                    if(event.clientX > (self.m_location.x-self.m_borderThickness/2) & event.clientX < (self.m_location.x+self.m_borderThickness/2))
+                    if(event.clientX > (self.m_location.x) & event.clientX < (self.m_location.x+self.m_borderThickness))
                     {
                         //console.log("left")
                         document.body.style.cursor = 'e-resize';
                         self.m_hoveredBorder = "left";
                     }
-                    else if(event.clientX > (self.m_location.x+self.m_targetSize.width-self.m_borderThickness/2) & event.clientX < (self.m_location.x+self.m_targetSize.width+self.m_borderThickness/2))
+                    else if(event.clientX > (self.m_location.x+self.m_targetSize.width-self.m_borderThickness) & event.clientX < (self.m_location.x+self.m_targetSize.width))
                     {
                         //console.log("right")
                         document.body.style.cursor = 'e-resize';
@@ -852,12 +958,14 @@ class FloatingWindow
                 }
                 else
                 {
-                    document.body.style.cursor = 'default';
+                    //document.body.style.cursor = 'default';
                     self.m_hoveredBorder = "none";
                 }
             }
+            */
         })
         $(this.m_closeBtn).on("click", function() {
+            console.log("close")
             self.close();
         });
         $(this.m_maximizeBtn).on("click", function() {
@@ -871,23 +979,59 @@ class FloatingWindow
             {
                 self.m_location.x = 0;
                 self.m_location.y = 0;
-                self.m_targetSize.width = self.m_parent[0].offsetWidth;
-                self.m_targetSize.height = self.m_parent[0].offsetHeight;    
+                self.m_targetSize.width = self.m_parent.getDOM().offsetWidth;
+                self.m_targetSize.height = self.m_parent.getDOM().offsetHeight;    
                 self.update();
             }
         })
     }
     update()
     {
+        if(this.m_location.x < 0)
+        {
+            var tmpX = 0;
+        }
+        else if(this.m_location.x + this.m_targetSize.width > $(window).width())
+        {
+            var tmpX = $(window).width() - this.m_targetSize.width;
+        }
+        else
+        {
+            var tmpX = this.m_location.x;
+        }
+
+        if(this.m_location.y - this.m_dragAreaThickness < 0)
+        {
+            //var tmpY = self.m_dragArea.height;
+            var tmpY = this.m_dragAreaThickness;
+        }
+        else if(this.m_location.y + this.m_targetSize.height > $(window).height())
+        {
+            var tmpY = $(window).height() - this.m_targetSize.height;
+        }
+        else
+        {
+            var tmpY = this.m_location.y;
+        }
+        this.m_location = {
+                x: tmpX,
+                y: tmpY,
+        }
+
         $(this.m_container).css("height", this.m_targetSize.height);
         $(this.m_container).css("width", this.m_targetSize.width);
         $(this.m_container).css("left", this.m_location.x);
         $(this.m_container).css("top", this.m_location.y);
 
-        $(this.m_dragArea).css("left", -1);
-        $(this.m_dragArea).css("top", -1);
-        $(this.m_dragArea).css("height", 20);
-        $(this.m_dragArea).css("width", this.m_targetSize.width+2);
+        $(this.m_topBar).css("left", );
+        $(this.m_topBar).css("top", -this.m_dragAreaThickness);
+        $(this.m_topBar).css("height", this.m_dragAreaThickness);
+        $(this.m_topBar).css("width", this.m_targetSize.width);
+
+        $(this.m_dragArea).css("height", this.m_dragAreaThickness);
+        $(this.m_dragArea).css("width", this.m_topBar.clientWidth-this.m_buttonsArea.clientWidth);
+
+        $(this.m_buttonsArea).css("height", this.m_dragAreaThickness);
 
         $(this.m_closeBtn).css("width", 30);
 
@@ -910,8 +1054,8 @@ class FloatingWindow
             this.m_preMaximizedInfos.height = this.m_targetSize.height;
             this.m_location.x = 0;
             this.m_location.y = 0;
-            this.m_targetSize.width = this.m_parent[0].offsetWidth;
-            this.m_targetSize.height = this.m_parent[0].offsetHeight;
+            this.m_targetSize.width = this.m_parent.getDOM().offsetWidth;
+            this.m_targetSize.height = this.m_parent.getDOM()   .offsetHeight;
             this.update();
         }
         else
@@ -922,6 +1066,20 @@ class FloatingWindow
             this.m_targetSize.width = this.m_preMaximizedInfos.width;
             this.m_targetSize.height = this.m_preMaximizedInfos.height;
             this.update()
+        }
+    }
+    toFront()
+    {
+        //$(this.m_container).detach().appendTo($(this.m_parent.getDOM()));
+        //$(this.m_container).insertAfter($(this.m_container).parent().children(':last'));
+        //$(this.m_container).insertAfter($(this.m_container).siblings(":last"));
+        for(var i in this.m_parent.m_windows)
+        {
+            if(this.m_parent.m_windows[i]!=this)
+            {
+                $(this.m_parent.m_windows[i].m_container).insertBefore($(this.m_container));
+            }
+            //$(this.m_parent.m_container).insertBefore($(this.m_parent.m_container).siblings(":first"));
         }
     }
 }

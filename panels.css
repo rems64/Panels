@@ -22,37 +22,54 @@ html, body
     top: 0px;
 }
 
-.pnls-borders
-{
-    border: solid black 0px;
-}
-
-.panel
+.pnls-panel
 {
     position: absolute;
-    background-color: red;
     height: 100px;
     width: 100px;
     overflow: hidden;
-    padding: 5px;
-    
-    color: white;
 }
 
-.first
+.pnls-panelTopBar
 {
-    background-color: hsl(0, 0%, 15%);;
+    position: aboslute;
 }
 
-.second
+.pnls-panelUndockBtn
 {
-    background-color: hsl(0, 0%, 15%);;
+    height: 20px;
+    width: 20px;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.pnls-panelUndockBtn::before
+{
+    content: "";
+    position: absolute;
+    height: 12px;
+    width: 12px;
+    transform: translate(3px, 3px);
+}
+
+.pnls-panelUndockBtn::after
+{
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 14px;
+    transform: translate(8px, 8px) rotate(-45deg);
+}
+
+.pnls-panelContent
+{
+    padding: 10px;
+    content: "cia coco";
 }
 
 .pnls-separator-container
 {
     position: absolute;
-    background-color: black;
     -webkit-user-select: none;
     user-select: none;
 }
@@ -60,24 +77,25 @@ html, body
 .pnls-floatingWindow
 {
     position: absolute;
-    background-color: hsl(0, 0%, 30%);
-    border: solid black 1px;
+}
+
+.pnls-floatingWindowTopBar
+{
+    position: relative;
+    display: flex;
 }
 
 .pnls-floatingWindowDragArea
 {
-    position: relative;
-    background-color: hsl(0, 0%, 10%);
+    width: auto;
 }
 
 .pnls-floatingWindowBtnsArea
 {
-    position: relative;
-    margin-left: auto;
+    width: auto;
+    align-self: flex-end;
     display: flex;
     justify-content: end;
-    width: fit-content;
-    height: 100%;
 }
 
 .pnls-floatingWindowBtnsClose
@@ -93,7 +111,6 @@ html, body
 
 .pnls-floatingWindowBtnsClose:hover
 {
-    background-color: red;
 }
 
 .pnls-floatingWindowBtnsClose::before, .pnls-floatingWindowBtnsClose::after
@@ -102,9 +119,7 @@ html, body
     display: inline-block;
     height: 100%;
     width: 2px;
-    background-color: white;
     transform-origin: center;
-    border-radius: 1.5px;
 }
 .pnls-floatingWindowBtnsClose::before
 {
@@ -128,7 +143,6 @@ html, body
 
 .pnls-floatingWindowBtnsMaximize::before
 {
-    border: solid white 2px;
     content: "";
     display: inline-block;
     height: 60%;
@@ -155,7 +169,6 @@ html, body
     margin-top: 10%;
     height: 80%;
     width: 2px;
-    background-color: white;
     transform-origin: center;
     transform: translate(0%, 0%) rotate(90deg);
 }
@@ -166,7 +179,6 @@ html, body
 
 .contextMenuContainer
 {
-    background-color: hsl(0, 0%, 40%);
     padding: 1px;
     position: absolute;
     display: inline-block;
@@ -177,11 +189,9 @@ html, body
 
 .contextMenuElement
 {
-    background-color: hsl(0, 0%, 40%);
     padding: 5px;
     -webkit-user-select: none;
     user-select: none;
-    color: white;
 
     font-size: 16px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -189,25 +199,20 @@ html, body
 
 .contextMenuElement:hover
 {
-    background-color: hsl(0, 0%, 35%);
 }
 
 .contextMenuElement:active
 {
-    background-color: hsl(0, 0%, 30%);
 }
 
 .contextMenuElementRed
 {
-    background-color: hsl(0, 80%, 40%);
 }
 
 .contextMenuElementRed:hover
 {
-    background-color: hsl(0, 80%, 35%);
 }
 
 .contextMenuElementRed:active
 {
-    background-color: hsl(0, 80%, 30%);
 }

@@ -1,4 +1,4 @@
-var manager = new DocksManager($("body"));
+var manager = new PanelsManager($("body"));
 
 var main = manager.addPanelGroup("main", "VERTICAL");
 
@@ -19,8 +19,8 @@ manager.update();
 
 
 
-win1 = new FloatingWindow(
-    $("body"),
+win1 = manager.addWindow(
+    manager.getDOM(),
     {
         x: 100,
         y: 150
@@ -30,4 +30,15 @@ win1 = new FloatingWindow(
         height: 200
     }
 );
-win1.update();
+
+win2 = manager.addWindow(
+    manager.getDOM(),
+    {
+        x: 500,
+        y: 150
+    },
+    {
+        width: 400,
+        height: 200
+    }
+);

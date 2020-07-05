@@ -1,0 +1,130 @@
+:root {
+    --primary-color: hsl(200, 100%, 50%);
+  }
+
+.pnls-panel
+{
+    color: white;
+}
+
+.pnls-panelTopBar
+{
+    background-color: hsl(100, 0%, 30%);
+}
+
+.pnls-panelUndockBtn
+{
+    background-color: hsl(100, 0%, 25%);
+}
+
+.pnls-panelUndockBtn::before
+{
+    border-top: solid white 2px;
+    border-right: solid white 2px;
+}
+
+.pnls-panelUndockBtn::after
+{
+    border-top: solid white 2px;
+}
+
+.pnls-separator-container
+{
+    background-color: black;
+}
+
+
+
+.pnls-floatingWindow
+{
+    background-color: hsl(0, 0%, 100%);
+    box-shadow: 0px 0px 20px 2px black;
+    border: solid white 0px;
+    border-radius: 0px 0px 10px 10px;
+}
+
+.pnls-floatingWindowTopBar
+{
+    background-color: hsla(200, 100%, 50%, 50%);
+    backdrop-filter: blur(10px);
+    border-radius: 10px 10px 0px 0px;
+}
+
+.pnls-floatingWindowDragArea
+{
+    background-color: transparent;
+}
+
+
+.pnls-floatingWindowBtnsClose
+{
+    border-radius: 0px 10px 0px 0px;
+}
+
+.pnls-floatingWindowBtnsClose:hover
+{
+    background-color: red;
+}
+
+.pnls-floatingWindowBtnsClose::before, .pnls-floatingWindowBtnsClose::after
+{
+    background-color: white;
+    border-radius: 1.5px;
+}
+
+
+
+.pnls-floatingWindowBtnsMaximize::before
+{
+    border: solid white;
+}
+
+
+.pnls-floatingWindowBtnsMinimize::before
+{
+    background-color: white;
+}
+
+
+
+
+
+.contextMenuContainer
+{
+    background-color: hsl(0, 0%, 40%);
+}
+
+.contextMenuElement
+{
+    background-color: hsl(0, 0%, 40%);
+    padding: 5px;
+    color: white;
+
+    font-size: 16px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.contextMenuElement:hover
+{
+    background-color: hsl(0, 0%, 35%);
+}
+
+.contextMenuElement:active
+{
+    background-color: hsl(0, 0%, 30%);
+}
+
+.contextMenuElementRed
+{
+    background-color: hsl(0, 80%, 40%);
+}
+
+.contextMenuElementRed:hover
+{
+    background-color: hsl(0, 80%, 35%);
+}
+
+.contextMenuElementRed:active
+{
+    background-color: hsl(0, 80%, 30%);
+}
