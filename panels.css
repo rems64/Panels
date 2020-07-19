@@ -30,6 +30,14 @@ html, body
     overflow: hidden;
 }
 
+.pnls-floatingWindowContent
+{
+    position: relative;
+    height: 100%;
+    width: 100%;
+    background-color: white;
+}
+
 .pnls-panelTopBar
 {
     position: aboslute;
@@ -63,8 +71,6 @@ html, body
 
 .pnls-panelContent
 {
-    padding: 10px;
-    content: "cia coco";
 }
 
 .pnls-separator-container

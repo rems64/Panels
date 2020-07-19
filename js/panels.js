@@ -39,11 +39,12 @@ class DockablePanel extends Panel // Base panel class
     DockablePanel is the key class
     It holds both Panel et Window features
     */
-   constructor(manager, parent, name, additionnalClasses) { // Constructor called during initialisation
+   constructor(manager, parent, content, name, additionnalClasses) { // Constructor called during initialisation
     super()
     var self = this;
     this.m_parent = parent;
     this.m_manager = manager;
+    this.m_content = content;
     this.m_name = name; // Window name (used when window is undocked) <String>
     this.m_location = {x:0, y:0}; // Window location <{x:Integer, y:Integer}>
     this.m_classes = additionnalClasses; // Additionnal css classes <[String]>
@@ -57,6 +58,14 @@ class DockablePanel extends Panel // Base panel class
     this.m_undockBtn = document.createElement("div");
     this.m_undockBtn.classList.add("pnls-panelUndockBtn");
     this.m_topBar.appendChild(this.m_undockBtn);
+
+    this.m_contentPnl = document.createElement("div");
+    this.m_contentPnl.classList.add("pnls-panelContent");
+    this.m_container.appendChild(this.m_contentPnl);
+
+    $(this.m_content).detach().appendTo($(this.m_contentPnl));
+    //this.m_contentPnl.chi = this.m_content;
+    console.log(this.m_content);
 
     $(this.m_undockBtn).click(() => {
         self.undock();
@@ -144,6 +153,11 @@ class DockablePanel extends Panel // Base panel class
         $(this.m_topBar).css("left", 0);
         $(this.m_topBar).css("width", this.m_width);
         $(this.m_topBar).css("height", 20);
+        $(this.m_content).css("position", "relative");
+        $(this.m_content).css("left", 0);
+        $(this.m_content).css("top", 0);
+        $(this.m_content).css("width", this.m_width);
+        $(this.m_content).css("height", this.m_height-20);
     }    
     getDOM()
     {
@@ -559,9 +573,9 @@ class PanelGroup extends Panel
     {
         return this.m_container;
     }
-    addPanel(name, additionnalClasses)
+    addPanel(name, content, additionnalClasses)
     {
-        var nPanel = new DockablePanel(this.m_manager, this, name, additionnalClasses);
+        var nPanel = new DockablePanel(this.m_manager, this, content, additionnalClasses);
         this.addChild(nPanel)
         //this.update();
         return nPanel;
@@ -592,9 +606,9 @@ class PanelsManager
             //self.update()
         })
     }
-    addPanel(name, additionnalClasses, inHtml)
+    addPanel(name, content, additionnalClasses, inHtml)
     {
-        var nPanel = new DockablePanel(this, this.m_container, name, additionnalClasses);
+        var nPanel = new DockablePanel(this, this.m_container, content, additionnalClasses);
         this.m_container.m_panels.push(nGroup);
         //this.m_panels[0].addChild(nPanel)
         return nPanel;
@@ -682,6 +696,10 @@ class FloatingWindow
         this.m_topBar.classList.add("pnls-floatingWindowTopBar");
         this.m_container.appendChild(this.m_topBar);
 
+        this.m_content = document.createElement("div");
+        this.m_content.classList.add("pnls-floatingWindowContent");
+        this.m_container.appendChild(this.m_content);
+
         this.m_dragArea = document.createElement("div");
         this.m_dragArea.classList.add("pnls-floatingWindowDragArea");
         this.m_topBar.appendChild(this.m_dragArea);
@@ -719,8 +737,8 @@ class FloatingWindow
 
         this.m_dragAreaThickness = 28;
         
-        $(this.m_container).on("mouseup", function(event) {
-            //self.toFront();
+        $(this.m_container).on("mousedown", function(event) {
+            self.toFront();
         });
         
         $(this.m_dragArea).on("mousedown", function(event) {
@@ -791,10 +809,10 @@ class FloatingWindow
                         var tmpX = event.clientX - self.m_dragOffset.x;
                     }
 
-                    if(event.clientY - self.m_dragOffset.y - self.m_dragAreaThickness < 0)
+                    if(event.clientY - self.m_dragOffset.y  < 0)
                     {
-                        //var tmpY = self.m_dragArea.height;
-                        var tmpY = self.m_dragAreaThickness;
+                        var tmpY = 0;
+                        //var tmpY = self.m_dragAreaThickness;
                     }
                     else if(event.clientY - self.m_dragOffset.y + self.m_targetSize.height > $(window).height())
                     {
@@ -814,7 +832,8 @@ class FloatingWindow
             }
             else if(self.m_isBorderBeingDragged)
             {
-                $(document.body).css("user-select", "none");
+                if($(document.body).css("user-select")!="none")
+                    $(document.body).css("user-select", "none");
                 if(self.m_hoveredBorder=="bottom")
                 {
                     if(event.clientY - self.m_location.y>self.m_incompressability.height)
@@ -1000,10 +1019,10 @@ class FloatingWindow
             var tmpX = this.m_location.x;
         }
 
-        if(this.m_location.y - this.m_dragAreaThickness < 0)
+        if(this.m_location.y < 0)
         {
-            //var tmpY = self.m_dragArea.height;
-            var tmpY = this.m_dragAreaThickness;
+            var tmpY = 0;
+            //var tmpY = this.m_dragAreaThickness;
         }
         else if(this.m_location.y + this.m_targetSize.height > $(window).height())
         {
@@ -1023,10 +1042,11 @@ class FloatingWindow
         $(this.m_container).css("left", this.m_location.x);
         $(this.m_container).css("top", this.m_location.y);
 
-        $(this.m_topBar).css("left", );
-        $(this.m_topBar).css("top", -this.m_dragAreaThickness);
+        //$(this.m_topBar).css("top", -this.m_dragAreaThickness);
         $(this.m_topBar).css("height", this.m_dragAreaThickness);
         $(this.m_topBar).css("width", this.m_targetSize.width);
+
+        $(this.m_content).css("height", this.m_targetSize.height-this.m_dragAreaThickness);
 
         $(this.m_dragArea).css("height", this.m_dragAreaThickness);
         $(this.m_dragArea).css("width", this.m_topBar.clientWidth-this.m_buttonsArea.clientWidth);
@@ -1042,6 +1062,13 @@ class FloatingWindow
     close()
     {
         $(this.m_container).remove();
+        for(var i in this.m_parent.m_windows)
+        {
+            if(this.m_parent.m_windows[i] == this)
+            {
+                this.m_parent.m_windows.splice(i, 1);
+            }
+        }
     }
     maximize()
     {
