@@ -10,6 +10,6 @@
   "author": "Remy Fayet",
   "license": "Apache-2.0",
   "dependencies": {
-    "electron": "^9.0.4"
+    "electron": "^18.3.7"
   }
 }
